@@ -193,7 +193,6 @@ bool loadCartridge(const char* rom_file_name) {
 
     header = (CartridgeHeader*)(rom_data + kRomSpace);
     
-
     header->title[15] = '\0';
 
     bool is_checksum_valid = isChecksumValid();
@@ -208,10 +207,6 @@ bool loadCartridge(const char* rom_file_name) {
     printf("\t Checksum : %2.2X (%s)\n", header->header_checksum, is_checksum_valid ? "PASSED" : "FAILED");
 
     free(rom_data);
-
-    if (!is_checksum_valid) {
-        return false;
-    }
-
-    return true;
+    
+    return is_checksum_valid;
 }
