@@ -3,12 +3,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-enum CartridgeHeaderSizes {
+enum CartridgeConstants {
     kEntryPointSize = 4,
     kNintendoLogoSize = 48,
     kTitleSize = 16,
     kManufacturerCodeSize = 3,
     kMaxNewLicenseeCode = 0xA4,
+    kNewLicenseeCodeFlag = 0x33,
     kMaxCartridgeType = 0x22,
     kRomSpace = 256
 };
@@ -136,11 +137,15 @@ static uint8_t* rom_data;
 static CartridgeHeader* header;
 
 // Private prototypes
-static uint8_t getCartridgeNewLicenseeCodeFromValue(void);
-static const char* getCartridgeNewLicenseeName(void);
+static uint8_t getCartridgeLicenseeCodeFromValue(void);
+static const char* getCartridgeLicenseeName(void);
 static const char* getCartridgeType(void);
 
-static uint8_t getCartridgeNewLicenseeCodeFromValue(void) {
+static uint8_t getCartridgeLicenseeCodeFromValue(void) {
+    if (header->old_licensee_code != kNewLicenseeCodeFlag) {
+        return header->old_licensee_code;
+    }
+
     uint16_t licensee_code = header->new_licensee_code;
 
     uint8_t lower_byte = (uint8_t)(licensee_code & 0x00FF);
@@ -152,8 +157,8 @@ static uint8_t getCartridgeNewLicenseeCodeFromValue(void) {
     return converted_code;
 }
 
-static const char* getCartridgeNewLicenseeName(void) {
-    uint8_t converted_code = getCartridgeNewLicenseeCodeFromValue();
+static const char* getCartridgeLicenseeName(void) {
+    uint8_t converted_code = getCartridgeLicenseeCodeFromValue();
 
     if (converted_code <= kMaxNewLicenseeCode) {
         return kLicenseeCodeNames[converted_code];
@@ -218,8 +223,7 @@ bool loadCartridge(const char* rom_file_name) {
     printf("\t Type     : %2.2Xh (%s)\n", header->cartridge_type, getCartridgeType());
     printf("\t ROM Size : %d KB\n", 32 << header->rom_size);
     printf("\t RAM Size : %2.2Xh\n", header->ram_size);
-    printf("\t LIC Code : %2.2Xh (%s)\n", getCartridgeNewLicenseeCodeFromValue(), getCartridgeNewLicenseeName());
-    printf("\t Old Code : %2.2Xh\n", header->old_licensee_code);
+    printf("\t LIC Code : %2.2Xh (%s)\n", getCartridgeLicenseeCodeFromValue(), getCartridgeLicenseeName());
     printf("\t ROM Vers : %2.2Xh\n", header->rom_version_number);
     printf("\t Checksum : %2.2Xh (%s)\n", header->header_checksum, is_checksum_valid ? "PASSED" : "FAILED");
 
