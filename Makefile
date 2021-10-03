@@ -6,7 +6,7 @@ OUT_FOLDER = build
 OBJ_FOLDER = $(OUT_FOLDER)/obj
 
 # Define any compile-time flags
-CFLAGS = -Wall -Werror -std=c99
+CFLAGS = -Wall -std=c99
 
 # Define any directories containing header files other than /usr/include
 INCLUDES =	-I. \

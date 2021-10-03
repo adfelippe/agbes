@@ -136,16 +136,30 @@ static uint8_t* rom_data;
 static CartridgeHeader* header;
 
 // Private prototypes
+static uint8_t getCartridgeNewLicenseeCodeFromValue(void);
 static const char* getCartridgeNewLicenseeName(void);
 static const char* getCartridgeType(void);
 
+static uint8_t getCartridgeNewLicenseeCodeFromValue(void) {
+    uint16_t licensee_code = header->new_licensee_code;
+
+    uint8_t lower_byte = (uint8_t)(licensee_code & 0x00FF);
+    uint8_t higher_byte = (uint8_t)((licensee_code >> 8) & 0x00FF);
+
+    const char kLicenseeCodeString[3] = {(char)lower_byte, (char)higher_byte, '\0'};
+    uint8_t converted_code = (uint8_t)strtoul(kLicenseeCodeString, NULL, 10);
+
+    return converted_code;
+}
 
 static const char* getCartridgeNewLicenseeName(void) {
-    if (header->new_licensee_code <= kMaxNewLicenseeCode) {
-        return kLicenseeCodeNames[header->new_licensee_code];
-    }
+    uint8_t converted_code = getCartridgeNewLicenseeCodeFromValue();
 
-    return "Invalid Licensee Code";
+    if (converted_code <= kMaxNewLicenseeCode) {
+        return kLicenseeCodeNames[converted_code];
+    } else {
+        return "Invalid Licensee Code"; 
+    }
 }
 
 static const char* getCartridgeType(void) {
@@ -179,6 +193,8 @@ bool loadCartridge(const char* rom_file_name) {
     fseek(fp, 0, SEEK_END);
     rom_size = ftell(fp);
 
+    printf("ROM size: %lu bytes\n", rom_size);
+
     rewind(fp);
 
     rom_data = malloc(rom_size);
@@ -199,12 +215,13 @@ bool loadCartridge(const char* rom_file_name) {
 
     printf("Cartridge Loaded:\n");
     printf("\t Title    : %s\n", header->title);
-    printf("\t Type     : %2.2X (%s)\n", header->cartridge_type, getCartridgeType());
+    printf("\t Type     : %2.2Xh (%s)\n", header->cartridge_type, getCartridgeType());
     printf("\t ROM Size : %d KB\n", 32 << header->rom_size);
-    printf("\t RAM Size : %2.2X\n", header->ram_size);
-    printf("\t LIC Code : %2.2X (%s)\n", header->new_licensee_code, getCartridgeNewLicenseeName());
-    printf("\t ROM Vers : %2.2X\n", header->rom_version_number);
-    printf("\t Checksum : %2.2X (%s)\n", header->header_checksum, is_checksum_valid ? "PASSED" : "FAILED");
+    printf("\t RAM Size : %2.2Xh\n", header->ram_size);
+    printf("\t LIC Code : %2.2Xh (%s)\n", getCartridgeNewLicenseeCodeFromValue(), getCartridgeNewLicenseeName());
+    printf("\t Old Code : %2.2Xh\n", header->old_licensee_code);
+    printf("\t ROM Vers : %2.2Xh\n", header->rom_version_number);
+    printf("\t Checksum : %2.2Xh (%s)\n", header->header_checksum, is_checksum_valid ? "PASSED" : "FAILED");
 
     free(rom_data);
     
