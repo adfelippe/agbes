@@ -1,12 +1,12 @@
 # Define compiler to use
-CC = gcc
+CC = g++
 
 SRC_FOLDER = src
 OUT_FOLDER = build
 OBJ_FOLDER = $(OUT_FOLDER)/obj
 
 # Define any compile-time flags
-CFLAGS = -Wall -std=c99
+CFLAGS = -Wall -std=c++17
 
 # Define any directories containing header files other than /usr/include
 INCLUDES =	-I. \
@@ -24,12 +24,12 @@ INCLUDES =	-I. \
 LIBS = 
 
 # Define the C source files
-SRCS = $(wildcard $(SRC_FOLDER)/*.c)
+SRCS = $(wildcard $(SRC_FOLDER)/*.cpp)
 
 # define the C object files
 # Below we are replacing the suffix .c of all words in the macro SRCS
 # with the .o suffix
-OBJS := $(addprefix $(OBJ_FOLDER)/,$(notdir $(SRCS:.c=.o)))
+OBJS := $(addprefix $(OBJ_FOLDER)/,$(notdir $(SRCS:.cpp=.o)))
 
 # define the executable file
 MAIN = $(OUT_FOLDER)/agbes
@@ -49,7 +49,7 @@ $(MAIN): $(OBJS)
 # it uses automatic variables $<: the name of the prerequisite of
 # the rule(a .c or cpp file) and $@: the name of the target of the rule (a .o file)
 # (see the gnu make manual section about automatic variables)
-$(OBJ_FOLDER)/%.o: $(SRC_FOLDER)/%.c
+$(OBJ_FOLDER)/%.o: $(SRC_FOLDER)/%.cpp
 	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
 $(shell mkdir -p $(OBJ_FOLDER))
