@@ -12,10 +12,7 @@ int main(int argc, char* argv[]) {
     }
 
     Cartridge rom(argv[1]);
-
-    bool result = rom.loadCartridge();
-
-    std::cout << "Result: " << result << std::endl;
+    rom.loadCartridge();
 
     exit(EXIT_SUCCESS);
 }

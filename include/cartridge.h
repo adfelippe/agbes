@@ -12,6 +12,7 @@ private:
     std::string file_path_;
     std::unique_ptr<uint8_t[]> rom_data;
     bool isChecksumValid(void);
+    std::string convertIntToHexString(uint32_t value);
 
 public:
     Cartridge(const std::string& file_path) : file_path_(file_path) {}

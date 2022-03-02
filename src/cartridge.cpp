@@ -88,7 +88,7 @@ bool Cartridge::loadCartridge(void) {
         return false;
     }
 
-    std::cout << "ROM size: " << rom_file_size / 1024 << " KBytes" << std::endl;
+    std::cout << "ROM size: " << rom_file_size / 1024 << " KB" << std::endl;
 
     rom_file.seekg(0, std::ios::beg);
     rom_file.read((char*)rom_data.get(), rom_file_size);
@@ -100,7 +100,7 @@ bool Cartridge::loadCartridge(void) {
     std::cout << "Cartridge type: " << getCartridgeTypeString(header->cartridge_type) << std::endl;
     std::cout << "Licensee code: " << 
         convertIntToHexString(getCartridgeLicenseeCodeFromValue(header->old_licensee_code, header->new_licensee_code)) << std::endl;
-    std::cout << "Licensee: " << getCartridgeLicenseeCodeNameString(header->old_licensee_code, header->new_licensee_code) << std::endl;
+    std::cout << "Licensee name: " << getCartridgeLicenseeCodeNameString(header->old_licensee_code, header->new_licensee_code) << std::endl;
 
     return isChecksumValid();
 }
