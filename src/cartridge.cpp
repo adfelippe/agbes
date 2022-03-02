@@ -2,9 +2,14 @@
 
 #include <cstdint>
 #include <iostream>
-#include <stdlib.h>
+#include <cstdlib>
 #include <memory>
 #include <fstream>
+#include <vector>
+#include <iomanip>
+#include <sstream>
+
+#include "cartridge_info.h"
 
 enum CartridgeConstants {
     kEntryPointSize = 4,
@@ -12,7 +17,6 @@ enum CartridgeConstants {
     kTitleSize = 16,
     kManufacturerCodeSize = 3,
     kMaxNewLicenseeCode = 0xA4,
-    kNewLicenseeCodeFlag = 0x33,
     kMaxCartridgeType = 0x22,
     kRomSpace = 256
 };
@@ -45,6 +49,16 @@ bool Cartridge::isChecksumValid(void) {
     return (x & 0xFF);
 }
 
+std::string convertIntToHexString(uint32_t value) {
+    std::stringstream ss;
+    ss << std::setfill('0') << std::setw(2) << std::hex << value;
+
+    std::string hex_str = "0x";
+    hex_str += ss.str();
+
+    return hex_str;
+}
+
 Cartridge::Cartridge(void) {}
 
 Cartridge::~Cartridge(void) {}
@@ -74,7 +88,7 @@ bool Cartridge::loadCartridge(void) {
         return false;
     }
 
-    std::cout << "ROM size: " << rom_file_size << " bytes" << std::endl;
+    std::cout << "ROM size: " << rom_file_size / 1024 << " KBytes" << std::endl;
 
     rom_file.seekg(0, std::ios::beg);
     rom_file.read((char*)rom_data.get(), rom_file_size);
@@ -82,6 +96,11 @@ bool Cartridge::loadCartridge(void) {
 
     header = (CartridgeHeader*)(rom_data.get() + kRomSpace);
     header->title[15] = '\0';
+
+    std::cout << "Cartridge type: " << getCartridgeTypeString(header->cartridge_type) << std::endl;
+    std::cout << "Licensee code: " << 
+        convertIntToHexString(getCartridgeLicenseeCodeFromValue(header->old_licensee_code, header->new_licensee_code)) << std::endl;
+    std::cout << "Licensee: " << getCartridgeLicenseeCodeNameString(header->old_licensee_code, header->new_licensee_code) << std::endl;
 
     return isChecksumValid();
 }
